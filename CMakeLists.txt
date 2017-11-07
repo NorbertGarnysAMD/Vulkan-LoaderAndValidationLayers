@@ -305,6 +305,14 @@ macro(run_vk_xml_generate dependency output)
     )
 endmacro()
 
+# Define macro used for generating header files containing commit IDs for external dependencies
+macro(run_external_revision_generate source_dir revision_file output)
+    add_custom_command(OUTPUT ${output}
+    COMMAND ${PYTHON_CMD} ${SCRIPTS_DIR}/external_revision_generator.py ${source_dir} ${revision_file} ${output}
+    DEPENDS ${SCRIPTS_DIR}/external_revision_generator.py ${revision_file}
+    )
+endmacro()
+
 # Custom target for generated vulkan helper file dependencies
 add_custom_target(generate_helper_files DEPENDS
     vk_enum_string_helper.h
@@ -316,6 +324,7 @@ add_custom_target(generate_helper_files DEPENDS
     vk_layer_dispatch_table.h
     vk_dispatch_table_helper.h
     vk_extension_helper.h
+    spirv_tools_commit_id.h
     )
 
 # Rules to build generated helper files
@@ -328,6 +337,7 @@ run_vk_xml_generate(helper_file_generator.py vk_struct_size_helper.c)
 run_vk_xml_generate(helper_file_generator.py vk_enum_string_helper.h)
 run_vk_xml_generate(helper_file_generator.py vk_object_types.h)
 run_vk_xml_generate(helper_file_generator.py vk_extension_helper.h)
+run_external_revision_generate(${EXTERNAL_SOURCE_ROOT}/spirv-tools ${CMAKE_CURRENT_SOURCE_DIR}/external_revisions/spirv-tools_revision spirv_tools_commit_id.h)
 
 if(NOT WIN32)
     include(GNUInstallDirs)
